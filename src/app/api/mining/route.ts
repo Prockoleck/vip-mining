@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { getUser } from "@/lib/auth";
+import { getUser, tiers, calculateTier } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   const user = await getUser();
@@ -10,8 +10,8 @@ export async function POST(request: NextRequest) {
 
   const recharge = Number(user.total_recharge);
 
-  if (recharge < 100) {
-    return NextResponse.json({ error: "Minimum $100 recharge required to start mining." }, { status: 400 });
+  if (recharge < 10) {
+    return NextResponse.json({ error: "Minimum $10 deposit required to start mining." }, { status: 400 });
   }
 
   if (user.last_mining_time) {
@@ -21,15 +21,10 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  let profitRate = 0.02;
-  if (recharge >= 10000) profitRate = 0.07;
-  else if (recharge >= 5000) profitRate = 0.06;
-  else if (recharge >= 3000) profitRate = 0.05;
-  else if (recharge >= 1000) profitRate = 0.04;
-  else if (recharge >= 500) profitRate = 0.035;
-  else if (recharge >= 400) profitRate = 0.03;
-  else if (recharge >= 300) profitRate = 0.025;
-  else if (recharge >= 200) profitRate = 0.0225;
+  const tierId = calculateTier(recharge);
+  const tierList = tiers();
+  const tier = tierList.find((t) => t.id === tierId);
+  const profitRate = tier ? tier.profit / 100 : 0.0175;
 
   const profit = Number(user.balance) * profitRate;
 
