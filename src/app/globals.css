@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: #fbfbfd;
+  --color-foreground: #1d1d1f;
+  --color-primary: #0071e3;
+  --color-primary-glow: rgba(0, 113, 227, 0.4);
+  --color-glass: rgba(255, 255, 255, 0.75);
+  --color-glass-border: rgba(255, 255, 255, 0.8);
+  --color-text-dim: #86868b;
+  --color-text-main: #1d1d1f;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: #fbfbfd;
+  font-family: var(--font-plus-jakarta), sans-serif;
+  color: #1d1d1f;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Aurora Background */
+.aurora-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  filter: blur(100px);
+  opacity: 0.4;
+}
+
+.aurora-bg .blob {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  animation: move 25s infinite alternate ease-in-out;
+}
+
+.aurora-bg .b1 { background: #0071e3; top: -10%; left: -10%; }
+.aurora-bg .b2 { background: #5e5ce6; bottom: -10%; right: -10%; animation-delay: -7s; }
+.aurora-bg .b3 { background: #64d2ff; top: 40%; left: 30%; width: 300px; height: 300px; animation-duration: 25s; }
+
+@keyframes move {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(150px, 80px) scale(1.1); }
+}
+
+/* Entry Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes shimmer {
+  0% { left: -150%; }
+  100% { left: 150%; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-fadeInUp { animation: fadeInUp 0.6s ease-out both; }
+.animate-slideUp { animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-reveal { animation: reveal 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+/* Glass Card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Nav Dock */
+.nav-dock {
+  position: fixed;
+  bottom: 30px;
+  width: 92%;
+  max-width: 410px;
+  height: 85px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(35px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 32px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+}
+
+/* Mining Orb */
+@keyframes orbSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
