@@ -29,7 +29,7 @@ export default function WithdrawPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amt = parseFloat(amount);
-    if (amt < 50) { alert("Minimum withdrawal is 50 USDT."); return; }
+    if (amt < 10) { alert("Minimum withdrawal is 10 USDT."); return; }
     if (amt > withdrawable) {
       alert(unlocked ? "Insufficient balance." : `Principal Locked. Current profit: $${withdrawable.toFixed(2)}`);
       return;
@@ -97,7 +97,7 @@ export default function WithdrawPage() {
             </div>
             <div style={{ marginBottom: "20px" }}>
               <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 800, color: "#86868b", textTransform: "uppercase", margin: "0 0 8px 5px" }}>Withdraw Amount (USDT)</label>
-              <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Min. 50" required step="0.01"
+              <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Min. 10" required step="0.01"
                 style={{ width: "100%", padding: "18px 20px", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.8)", background: "rgba(255,255,255,0.5)", fontFamily: "inherit", fontSize: "1rem", fontWeight: 700, outline: "none", transition: "0.3s", boxSizing: "border-box" }} />
             </div>
 

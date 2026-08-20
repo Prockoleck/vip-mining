@@ -8,8 +8,8 @@ export async function POST(request: NextRequest) {
 
   const { amount, address } = await request.json();
 
-  if (!amount || amount < 50) {
-    return NextResponse.json({ error: "Minimum withdrawal is 50 USDT." }, { status: 400 });
+  if (!amount || amount < 10) {
+    return NextResponse.json({ error: "Minimum withdrawal is 10 USDT." }, { status: 400 });
   }
 
   // Check referral unlock

@@ -64,15 +64,13 @@ export async function getUser() {
 
 export function tiers() {
   return [
-    { id: 1, name: "Bronze", min: 100, profit: 2.0, icon: "fa-seedling" },
-    { id: 2, name: "Silver", min: 200, profit: 2.25, icon: "fa-coins" },
-    { id: 3, name: "Gold", min: 300, profit: 2.5, icon: "fa-crown" },
-    { id: 4, name: "Platinum", min: 400, profit: 3.0, icon: "fa-gem" },
-    { id: 5, name: "Diamond", min: 500, profit: 3.5, icon: "fa-diamond" },
-    { id: 6, name: "Elite", min: 1000, profit: 4.0, icon: "fa-shuttle-space" },
-    { id: 7, name: "Elite Plus", min: 3000, profit: 5.0, icon: "fa-layer-group" },
-    { id: 8, name: "Immortal", min: 5000, profit: 6.0, icon: "fa-bolt" },
-    { id: 9, name: "Legendary", min: 10000, profit: 7.0, icon: "fa-fire-flame-curved" },
+    { id: 1, name: "Starter", min: 10, profit: 3.5, icon: "fa-seedling" },
+    { id: 2, name: "Basic", min: 51, profit: 3.0, icon: "fa-coins" },
+    { id: 3, name: "Standard", min: 101, profit: 2.75, icon: "fa-crown" },
+    { id: 4, name: "Advanced", min: 301, profit: 2.5, icon: "fa-gem" },
+    { id: 5, name: "Premium", min: 501, profit: 2.25, icon: "fa-diamond" },
+    { id: 6, name: "Elite", min: 1001, profit: 2.0, icon: "fa-shuttle-space" },
+    { id: 7, name: "VIP", min: 2001, profit: 1.75, icon: "fa-fire-flame-curved" },
   ];
 }
 
