@@ -20,6 +20,10 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname.startsWith("/api/admin/auth")) {
+    return NextResponse.next();
+  }
+
   if (pathname.startsWith("/api/admin")) {
     if (!adminSession) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
