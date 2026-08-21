@@ -43,8 +43,9 @@ export default function AdminPage() {
     }
   };
 
-  const handleAction = (action: string, id: number) => {
-    window.location.href = `/api/admin?action=${action}&id=${id}`;
+  const handleAction = async (action: string, id: number) => {
+    await fetch(`/api/admin?action=${action}&id=${id}`);
+    loadData();
   };
 
   if (!authenticated) {
@@ -81,7 +82,7 @@ export default function AdminPage() {
           <small style={{ color: "#86868b", fontWeight: 800, fontSize: "0.6rem", textTransform: "uppercase" }}>Current IST</small>
           <div style={{ color: "#30d158", fontWeight: 800, fontSize: "0.9rem" }}>{new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}</div>
         </div>
-        <a href="/api/admin?action=logout" style={{ color: "#ff453a", textDecoration: "none", fontWeight: 800, fontSize: "0.85rem", padding: "12px 24px", border: "1px solid rgba(255, 69, 58, 0.2)", borderRadius: "20px" }}>
+        <a href="/api/admin?action=logout" onClick={async (e) => { e.preventDefault(); await fetch("/api/admin?action=logout"); window.location.href = "/admin"; }} style={{ color: "#ff453a", textDecoration: "none", fontWeight: 800, fontSize: "0.85rem", padding: "12px 24px", border: "1px solid rgba(255, 69, 58, 0.2)", borderRadius: "20px", cursor: "pointer" }}>
           <i className="fa-solid fa-power-off" /> Secure Terminate
         </a>
       </div>
