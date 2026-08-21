@@ -49,7 +49,7 @@ export default async function WithdrawHistoryPage() {
                 </div>
                 <div>
                   <h4 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700 }}>${(Number(w.amount) - Number(w.fee)).toFixed(2)}</h4>
-                  <p style={{ margin: 0, fontSize: "0.75rem", color: "#94a3b8", marginTop: "2px" }}>{parseUTC(w.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} • {parseUTC(w.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
+                  <p style={{ margin: 0, fontSize: "0.75rem", color: "#94a3b8", marginTop: "2px" }}>{parseUTC(w.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "Asia/Kolkata" })} • {parseUTC(w.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}</p>
                 </div>
               </div>
               <div style={{ fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", padding: "6px 12px", borderRadius: "10px", letterSpacing: "0.5px", color: getStatusColor(w.status), background: `${getStatusColor(w.status)}15`, border: `1px solid ${getStatusColor(w.status)}33` }}>
