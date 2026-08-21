@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Withdrawal allowed once every 7 days." }, { status: 400 });
   }
 
-  const fee = amount * 0.05;
+  const fee = amount * 0.10;
 
   const { error: insError } = await supabase.from("withdrawals").insert({
     user_id: user.id,

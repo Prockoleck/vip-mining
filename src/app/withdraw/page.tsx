@@ -23,7 +23,7 @@ export default function WithdrawPage() {
     });
   }, []);
 
-  const fee = (parseFloat(amount) || 0) * 0.05;
+  const fee = (parseFloat(amount) || 0) * 0.10;
   const net = (parseFloat(amount) || 0) - fee;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,7 +103,7 @@ export default function WithdrawPage() {
 
             <div style={{ background: "rgba(0,0,0,0.03)", borderRadius: "20px", padding: "15px", marginBottom: "25px" }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", fontWeight: 600, marginBottom: "6px" }}>
-                <span>Processing Fee (5%)</span>
+                <span>Processing Fee (10%)</span>
                 <span>{fee > 0 ? fee.toFixed(2) : "0.00"} USDT</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", fontWeight: 800, color: "#0071e3", borderTop: "1px solid rgba(0,0,0,0.05)", paddingTop: "8px", marginTop: "5px" }}>
