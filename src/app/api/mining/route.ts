@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (user.last_mining_time) {
-    const diff = (Date.now() - new Date(user.last_mining_time).getTime()) / 1000;
+    const diff = (Date.now() - new Date(user.last_mining_time + (user.last_mining_time.endsWith("Z") ? "" : "Z")).getTime()) / 1000;
     if (diff < 86400) {
       return NextResponse.json({ error: "Miner is cooling down. Wait for the 24h cycle to end." }, { status: 400 });
     }

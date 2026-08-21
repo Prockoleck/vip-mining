@@ -42,7 +42,7 @@ export default function MiningPage() {
           return;
         }
         if (data.last_mining_time) {
-          const diff = (Date.now() - new Date(data.last_mining_time).getTime()) / 1000;
+          const diff = (Date.now() - new Date(data.last_mining_time + (data.last_mining_time.endsWith("Z") ? "" : "Z")).getTime()) / 1000;
           if (diff < 86400) {
             setCanMine(false);
             setSecondsLeft(Math.floor(86400 - diff));
