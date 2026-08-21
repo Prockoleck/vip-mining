@@ -1,22 +1,25 @@
-"use client";
-import { useState, useEffect } from "react";
+import { getUser } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
+import { redirect } from "next/navigation";
 
-interface DepositRecord {
-  amount: number;
-  status: string;
-  created_at: string;
-}
+export default async function DepositHistoryPage() {
+  const user = await getUser();
+  if (!user) redirect("/");
 
-export default function DepositHistoryPage() {
-  const [deposits, setDeposits] = useState<DepositRecord[]>([]);
-  const [totalApproved, setTotalApproved] = useState(0);
+  const { data: deposits } = await supabase
+    .from("deposits")
+    .select("amount, status, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
-  useEffect(() => {
-    fetch("/api/deposit-history").then(r => r.json()).then(data => {
-      setDeposits(data.deposits || []);
-      setTotalApproved(data.total_approved || 0);
-    });
-  }, []);
+  const { data: sumData } = await supabase
+    .from("deposits")
+    .select("amount")
+    .eq("user_id", user.id)
+    .eq("status", "approved");
+
+  const totalApproved = sumData?.reduce((sum, d) => sum + Number(d.amount), 0) || 0;
+  const depositList = deposits || [];
 
   const getStatusIcon = (s: string) => s === "approved" ? "fa-check" : s === "pending" ? "fa-clock" : "fa-xmark";
   const getStatusColor = (s: string) => s === "approved" ? "#10b981" : s === "pending" ? "#f59e0b" : "#f43f5e";
@@ -36,7 +39,7 @@ export default function DepositHistoryPage() {
       </div>
 
       <div style={{ padding: "0 20px" }}>
-        {deposits.length > 0 ? deposits.map((d, i) => (
+        {depositList.length > 0 ? depositList.map((d, i) => (
           <div key={i} style={{ background: "#151c2c", borderRadius: "20px", padding: "18px", marginBottom: "15px", display: "flex", alignItems: "center", justifyContent: "space-between", border: "1px solid rgba(255,255,255,0.03)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
               <div style={{ width: "48px", height: "48px", borderRadius: "14px", background: `${getStatusColor(d.status)}15`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.2rem", color: getStatusColor(d.status) }}>

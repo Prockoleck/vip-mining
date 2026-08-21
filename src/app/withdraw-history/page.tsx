@@ -1,24 +1,25 @@
-"use client";
-import { useState, useEffect } from "react";
+import { getUser } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
+import { redirect } from "next/navigation";
 
-interface WithdrawalRecord {
-  amount: number;
-  fee: number;
-  status: string;
-  wallet_address: string;
-  created_at: string;
-}
+export default async function WithdrawHistoryPage() {
+  const user = await getUser();
+  if (!user) redirect("/");
 
-export default function WithdrawHistoryPage() {
-  const [withdrawals, setWithdrawals] = useState<WithdrawalRecord[]>([]);
-  const [totalPaid, setTotalPaid] = useState(0);
+  const { data: withdrawals } = await supabase
+    .from("withdrawals")
+    .select("amount, fee, status, wallet_address, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
-  useEffect(() => {
-    fetch("/api/withdraw-history").then(r => r.json()).then(data => {
-      setWithdrawals(data.withdrawals || []);
-      setTotalPaid(data.total_paid || 0);
-    });
-  }, []);
+  const { data: sumData } = await supabase
+    .from("withdrawals")
+    .select("amount, fee")
+    .eq("user_id", user.id)
+    .eq("status", "approved");
+
+  const totalPaid = sumData?.reduce((sum, w) => sum + (Number(w.amount) - Number(w.fee)), 0) || 0;
+  const withdrawalList = withdrawals || [];
 
   const getStatusColor = (s: string) => s === "approved" ? "#10b981" : s === "pending" ? "#f59e0b" : "#f43f5e";
   const getStatusIcon = (s: string) => s === "approved" ? "fa-paper-plane" : s === "pending" ? "fa-clock" : "fa-ban";
@@ -38,7 +39,7 @@ export default function WithdrawHistoryPage() {
       </div>
 
       <div style={{ padding: "0 20px" }}>
-        {withdrawals.length > 0 ? withdrawals.map((w, i) => (
+        {withdrawalList.length > 0 ? withdrawalList.map((w, i) => (
           <div key={i} style={{ background: "#151c2c", borderRadius: "22px", padding: "20px", marginBottom: "15px", border: "1px solid rgba(255,255,255,0.03)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "15px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import NavDock from "@/components/NavDock";
+import { tiers } from "@/lib/tiers";
 
 interface UserData {
   username: string;
@@ -10,15 +11,23 @@ interface UserData {
   profile_pic: string | null;
 }
 
+const tierGradients: Record<string, { gradient: string; icon: string; color: string }> = {
+  Starter: { gradient: "linear-gradient(135deg, #34c759, #30b350)", icon: "fa-seedling", color: "white" },
+  Basic: { gradient: "linear-gradient(135deg, #0071e3, #0056b3)", icon: "fa-coins", color: "white" },
+  Standard: { gradient: "linear-gradient(135deg, #af52de, #8e3fd6)", icon: "fa-crown", color: "white" },
+  Advanced: { gradient: "linear-gradient(135deg, #ff9500, #e08600)", icon: "fa-gem", color: "white" },
+  Premium: { gradient: "linear-gradient(135deg, #ff3b30, #d63029)", icon: "fa-diamond", color: "white" },
+  Elite: { gradient: "linear-gradient(135deg, #5856d6, #4342b8)", icon: "fa-shuttle-space", color: "white" },
+  VIP: { gradient: "linear-gradient(135deg, #ffcc00, #e6b800)", icon: "fa-fire-flame-curved", color: "#1d1d1f" },
+};
+
 function getVipTier(recharge: number) {
-  if (recharge >= 10000) return { name: "Legendary", gradient: "linear-gradient(135deg, #ff0000, #4b0082)", icon: "fa-dragon", color: "white" };
-  if (recharge >= 5000) return { name: "Elite", gradient: "linear-gradient(135deg, #00f2fe, #4facfe)", icon: "fa-bolt", color: "white" };
-  if (recharge >= 1200) return { name: "Diamond", gradient: "linear-gradient(135deg, #e0c3fc, #8ec5fc)", icon: "fa-gem", color: "white" };
-  if (recharge >= 600) return { name: "Platinum", gradient: "linear-gradient(135deg, #e6e9f0, #eef1f5)", icon: "fa-shield-halved", color: "#1d1d1f" };
-  if (recharge >= 300) return { name: "Gold", gradient: "linear-gradient(135deg, #f6d365, #fda085)", icon: "fa-crown", color: "white" };
-  if (recharge >= 100) return { name: "Silver", gradient: "linear-gradient(135deg, #bdc3c7, #2c3e50)", icon: "fa-medal", color: "white" };
-  if (recharge >= 50) return { name: "Bronze", gradient: "linear-gradient(135deg, #a87932, #52361b)", icon: "fa-award", color: "white" };
-  return { name: "Newbie", gradient: "linear-gradient(135deg, #8e8e93, #636366)", icon: "fa-user", color: "white" };
+  let matched = tiers()[0];
+  for (const t of tiers()) {
+    if (recharge >= t.min) matched = t;
+  }
+  const styles = tierGradients[matched.name] || { gradient: "linear-gradient(135deg, #8e8e93, #636366)", icon: "fa-user", color: "white" };
+  return { name: matched.name, ...styles };
 }
 
 export default function ProfilePage() {
@@ -56,7 +65,14 @@ export default function ProfilePage() {
     router.push("/");
   };
 
-  if (!user) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}><p>Loading...</p></div>;
+  if (!user) return (
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+      <div className="aurora-bg"><div className="blob b1" /><div className="blob b2" /></div>
+      <div style={{ width: "130px", height: "130px", borderRadius: "45px", background: "rgba(255,255,255,0.1)", animation: "pulse 1.5s ease-in-out infinite" }} />
+      <div style={{ width: "200px", height: "20px", borderRadius: "10px", background: "rgba(255,255,255,0.1)", marginTop: "20px", animation: "pulse 1.5s ease-in-out infinite 0.2s" }} />
+      <div style={{ width: "140px", height: "16px", borderRadius: "8px", background: "rgba(255,255,255,0.08)", marginTop: "12px", animation: "pulse 1.5s ease-in-out infinite 0.4s" }} />
+    </div>
+  );
 
   const vip = getVipTier(Number(user.total_recharge));
   const imgSrc = preview || user.profile_pic;

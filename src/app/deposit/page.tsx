@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import WalletQR from "@/components/WalletQR";
 
-const WALLET = "0x153777e1127BBa3a0C7bD88CD04EC61468e2628D";
+const WALLET = process.env.NEXT_PUBLIC_DEPOSIT_WALLET || "0x153777e1127BBa3a0C7bD88CD04EC61468e2628D";
 
 export default function DepositPage() {
   const [amount, setAmount] = useState("");
@@ -59,8 +60,8 @@ export default function DepositPage() {
         {/* Deposit Card */}
         <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(30px)", border: "1px solid rgba(255,255,255,0.8)", borderRadius: "35px", padding: "30px 20px", boxShadow: "0 20px 40px rgba(0,0,0,0.05)", textAlign: "center", animation: "fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1)" }}>
           {/* QR Code */}
-          <div style={{ width: "180px", height: "180px", margin: "0 auto 25px", padding: "15px", background: "#fff", borderRadius: "30px", boxShadow: "0 10px 30px rgba(0, 113, 227, 0.1)" }}>
-            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${WALLET}`} alt="QR" style={{ width: "100%", borderRadius: "15px" }} />
+          <div style={{ margin: "0 auto 25px", display: "flex", justifyContent: "center" }}>
+            <WalletQR wallet={WALLET} />
           </div>
 
           {/* Address Box */}

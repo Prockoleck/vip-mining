@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import NavDock from "@/components/NavDock";
+import { tiers } from "@/lib/tiers";
 
 interface UserData {
   balance: number;
@@ -9,24 +10,22 @@ interface UserData {
   last_mining_time: string | null;
 }
 
-const tiers = [
-  { name: "Legendary", min: 10000, profit: 7.0, color: "#ff3b30", glow: "rgba(255, 59, 48, 0.2)" },
-  { name: "Immortal", min: 5000, profit: 6.0, color: "#ff9500", glow: "rgba(255, 149, 0, 0.2)" },
-  { name: "Elite Plus", min: 3000, profit: 5.0, color: "#af52de", glow: "rgba(175, 82, 222, 0.2)" },
-  { name: "Elite", min: 1000, profit: 4.0, color: "#5856d6", glow: "rgba(88, 86, 214, 0.2)" },
-  { name: "Diamond", min: 500, profit: 3.5, color: "#0071e3", glow: "rgba(0, 113, 227, 0.2)" },
-  { name: "Platinum", min: 400, profit: 3.0, color: "#34c759", glow: "rgba(52, 199, 89, 0.2)" },
-  { name: "Gold", min: 300, profit: 2.5, color: "#ffcc00", glow: "rgba(255, 204, 0, 0.2)" },
-  { name: "Silver", min: 200, profit: 2.25, color: "#8e8e93", glow: "rgba(142, 142, 147, 0.2)" },
-  { name: "Bronze", min: 100, profit: 2.0, color: "#a2845e", glow: "rgba(162, 132, 94, 0.2)" },
-];
+const themeColors: Record<string, { color: string; glow: string }> = {
+  Starter: { color: "#34c759", glow: "rgba(52,199,89,0.2)" },
+  Basic: { color: "#0071e3", glow: "rgba(0,113,227,0.2)" },
+  Standard: { color: "#af52de", glow: "rgba(175,82,222,0.2)" },
+  Advanced: { color: "#ff9500", glow: "rgba(255,149,0,0.2)" },
+  Premium: { color: "#ff3b30", glow: "rgba(255,59,48,0.2)" },
+  Elite: { color: "#5856d6", glow: "rgba(88,86,214,0.2)" },
+  VIP: { color: "#ffcc00", glow: "rgba(255,204,0,0.2)" },
+};
 
 export default function MiningPage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [canMine, setCanMine] = useState(true);
   const [secondsLeft, setSecondsLeft] = useState(0);
   const [mining, setMining] = useState(false);
-  const [statusMsg, setStatusMsg] = useState("> LOADING...");
+  const [statusMsg, setStatusMsg] = useState("> INITIALIZING...");
   const [orbActive, setOrbActive] = useState(false);
   const router = useRouter();
 
@@ -82,12 +81,14 @@ export default function MiningPage() {
   }, [secondsLeft, canMine]);
 
   const getTheme = () => {
-    if (!user) return tiers[tiers.length - 1];
+    if (!user) return { name: "Unranked", min: 0, profit: 0, color: "#666", glow: "rgba(0,0,0,0.1)" };
     const recharge = Number(user.total_recharge);
-    for (const tier of tiers) {
-      if (recharge >= tier.min) return tier;
+    let current = tiers()[0];
+    for (const tier of tiers()) {
+      if (recharge >= tier.min) current = tier;
     }
-    return { name: "Unranked", min: 0, profit: 0, color: "#666", glow: "rgba(0,0,0,0.1)" };
+    const colors = themeColors[current.name] || { color: "#666", glow: "rgba(0,0,0,0.1)" };
+    return { ...current, ...colors };
   };
 
   const theme = getTheme();
