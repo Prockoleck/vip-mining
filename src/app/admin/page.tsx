@@ -12,12 +12,21 @@ interface AdminData {
 
 export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [data, setData] = useState<AdminData | null>(null);
 
+  useEffect(() => {
+    fetch("/api/admin").then((res) => {
+      if (res.ok) { setAuthenticated(true); return res.json(); }
+      setChecking(false);
+    }).then((d) => { if (d) setData(d); }).catch(() => setChecking(false));
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     try {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
@@ -28,11 +37,19 @@ export default function AdminPage() {
         setAuthenticated(true);
         loadData();
       } else {
-        setError("Access Denied: Invalid Administrative Key");
+        const d = await res.json();
+        setError(d.error || "Access Denied");
       }
     } catch {
       setError("Network error");
     }
+  };
+
+  const handleLogout = async () => {
+    document.cookie = "admin_session=; path=/; max-age=0";
+    setAuthenticated(false);
+    setData(null);
+    setPassword("");
   };
 
   const loadData = async () => {
@@ -49,6 +66,13 @@ export default function AdminPage() {
   };
 
   if (!authenticated) {
+    if (checking) {
+      return (
+        <div style={{ minHeight: "100vh", background: "#0b0f1a", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
+          <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2rem", color: "#0071e3" }} />
+        </div>
+      );
+    }
     return (
       <div style={{ minHeight: "100vh", background: "#0b0f1a", fontFamily: "var(--font-plus-jakarta), sans-serif", display: "flex", alignItems: "center", justifyContent: "center", color: "white", overflow: "hidden" }}>
         <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", zIndex: -1, filter: "blur(100px)", opacity: 0.3 }}>
@@ -82,7 +106,7 @@ export default function AdminPage() {
           <small style={{ color: "#86868b", fontWeight: 800, fontSize: "0.6rem", textTransform: "uppercase" }}>Current IST</small>
           <div style={{ color: "#30d158", fontWeight: 800, fontSize: "0.9rem" }}>{new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" })}</div>
         </div>
-        <a href="/api/admin?action=logout" onClick={async (e) => { e.preventDefault(); await fetch("/api/admin?action=logout"); window.location.href = "/admin"; }} style={{ color: "#ff453a", textDecoration: "none", fontWeight: 800, fontSize: "0.85rem", padding: "12px 24px", border: "1px solid rgba(255, 69, 58, 0.2)", borderRadius: "20px", cursor: "pointer" }}>
+        <a href="/admin" onClick={(e) => { e.preventDefault(); handleLogout(); }} style={{ color: "#ff453a", textDecoration: "none", fontWeight: 800, fontSize: "0.85rem", padding: "12px 24px", border: "1px solid rgba(255, 69, 58, 0.2)", borderRadius: "20px", cursor: "pointer" }}>
           <i className="fa-solid fa-power-off" /> Secure Terminate
         </a>
       </div>
