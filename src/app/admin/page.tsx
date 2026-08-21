@@ -178,7 +178,7 @@ export default function AdminPage() {
             <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "0 8px" }}>
               <thead>
                 <tr>
-                  {["Member", "Amount", "Status", "Action"].map(h => (
+                  {["Member", "Amount", "Time", "Status", "Action"].map(h => (
                     <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#86868b", fontSize: "0.65rem", fontWeight: 800, textTransform: "uppercase" }}>{h}</th>
                   ))}
                 </tr>
@@ -188,6 +188,7 @@ export default function AdminPage() {
                   <tr key={d.id}>
                     <td style={{ padding: "12px", background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)", borderLeft: "1px solid rgba(255,255,255,0.06)", borderRadius: "12px 0 0 12px", fontWeight: 700 }}>{d.users?.username}</td>
                     <td style={{ padding: "12px", background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)", fontWeight: 800, color: "#30d158" }}>${Number(d.amount).toFixed(2)}</td>
+                    <td style={{ padding: "12px", background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)", fontSize: "0.7rem", color: "#86868b", whiteSpace: "nowrap" }}>{new Date(d.created_at + "Z").toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
                     <td style={{ padding: "12px", background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                       <span style={{ padding: "5px 10px", borderRadius: "8px", fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", background: d.status === "pending" ? "rgba(255,159,10,0.1)" : d.status === "approved" ? "rgba(48,209,88,0.1)" : "rgba(255,69,58,0.1)", color: d.status === "pending" ? "#ff9f0a" : d.status === "approved" ? "#30d158" : "#ff453a" }}>{d.status}</span>
                     </td>
@@ -209,7 +210,10 @@ export default function AdminPage() {
               <div key={d.id} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "15px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
                   <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>{d.users?.username}</span>
-                  <span style={{ padding: "4px 10px", borderRadius: "8px", fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", background: d.status === "pending" ? "rgba(255,159,10,0.1)" : d.status === "approved" ? "rgba(48,209,88,0.1)" : "rgba(255,69,58,0.1)", color: d.status === "pending" ? "#ff9f0a" : d.status === "approved" ? "#30d158" : "#ff453a" }}>{d.status}</span>
+                  <span style={{ fontSize: "0.6rem", color: "#86868b" }}>{new Date(d.created_at + "Z").toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", padding: "4px 10px", borderRadius: "8px", background: d.status === "pending" ? "rgba(255,159,10,0.1)" : d.status === "approved" ? "rgba(48,209,88,0.1)" : "rgba(255,69,58,0.1)", color: d.status === "pending" ? "#ff9f0a" : d.status === "approved" ? "#30d158" : "#ff453a" }}>{d.status}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ color: "#30d158", fontWeight: 800, fontSize: "1.1rem" }}>${Number(d.amount).toFixed(2)}</span>
@@ -237,7 +241,7 @@ export default function AdminPage() {
             <table style={{ width: "100%", borderCollapse: "separate", borderSpacing: "0 8px" }}>
               <thead>
                 <tr>
-                  {["Member", "Net", "Address", "Status", "Action"].map(h => (
+                  {["Member", "Net", "Address", "Time", "Status", "Action"].map(h => (
                     <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: "#86868b", fontSize: "0.65rem", fontWeight: 800, textTransform: "uppercase" }}>{h}</th>
                   ))}
                 </tr>
@@ -250,6 +254,7 @@ export default function AdminPage() {
                     <td style={{ padding: "12px", background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)", maxWidth: "160px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       <span style={{ fontFamily: "'Courier New', monospace", fontSize: "0.7rem", color: "#818cf8" }}>{w.wallet_address}</span>
                     </td>
+                    <td style={{ padding: "12px", background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)", fontSize: "0.7rem", color: "#86868b", whiteSpace: "nowrap" }}>{new Date(w.created_at + "Z").toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</td>
                     <td style={{ padding: "12px", background: "rgba(255,255,255,0.02)", borderTop: "1px solid rgba(255,255,255,0.06)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                       <span style={{ padding: "5px 10px", borderRadius: "8px", fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", background: w.status === "pending" ? "rgba(255,159,10,0.1)" : w.status === "approved" ? "rgba(48,209,88,0.1)" : "rgba(255,69,58,0.1)", color: w.status === "pending" ? "#ff9f0a" : w.status === "approved" ? "#30d158" : "#ff453a" }}>{w.status}</span>
                     </td>
@@ -271,7 +276,10 @@ export default function AdminPage() {
               <div key={w.id} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)", borderRadius: "16px", padding: "15px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
                   <span style={{ fontWeight: 700, fontSize: "0.85rem" }}>{w.users?.username}</span>
-                  <span style={{ padding: "4px 10px", borderRadius: "8px", fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", background: w.status === "pending" ? "rgba(255,159,10,0.1)" : w.status === "approved" ? "rgba(48,209,88,0.1)" : "rgba(255,69,58,0.1)", color: w.status === "pending" ? "#ff9f0a" : w.status === "approved" ? "#30d158" : "#ff453a" }}>{w.status}</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontSize: "0.6rem", color: "#86868b" }}>{new Date(w.created_at + "Z").toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>
+                    <span style={{ padding: "4px 10px", borderRadius: "8px", fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase", background: w.status === "pending" ? "rgba(255,159,10,0.1)" : w.status === "approved" ? "rgba(48,209,88,0.1)" : "rgba(255,69,58,0.1)", color: w.status === "pending" ? "#ff9f0a" : w.status === "approved" ? "#30d158" : "#ff453a" }}>{w.status}</span>
+                  </div>
                 </div>
                 <div style={{ fontSize: "0.65rem", color: "#818cf8", fontFamily: "'Courier New', monospace", marginBottom: "6px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{w.wallet_address}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
