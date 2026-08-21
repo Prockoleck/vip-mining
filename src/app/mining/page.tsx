@@ -37,8 +37,8 @@ export default function MiningPage() {
         const data = await res.json();
         setUser(data);
         const recharge = Number(data.total_recharge);
-        if (recharge < 100) {
-          setStatusMsg("> INSUFFICIENT COLLATERAL (MIN $100)");
+        if (recharge < 10) {
+          setStatusMsg("> INSUFFICIENT COLLATERAL (MIN $10)");
           setCanMine(false);
           return;
         }
@@ -91,7 +91,7 @@ export default function MiningPage() {
   };
 
   const theme = getTheme();
-  const lowBalance = user ? Number(user.total_recharge) < 100 : true;
+  const lowBalance = user ? Number(user.total_recharge) < 10 : true;
 
   const startSequence = async () => {
     setMining(true);

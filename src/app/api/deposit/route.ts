@@ -7,8 +7,8 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { amount } = await request.json();
-  if (!amount || amount < 50) {
-    return NextResponse.json({ error: "Minimum deposit is 50 USDT." }, { status: 400 });
+  if (!amount || amount < 10) {
+    return NextResponse.json({ error: "Minimum deposit is 10 USDT." }, { status: 400 });
   }
 
   const { error } = await supabase

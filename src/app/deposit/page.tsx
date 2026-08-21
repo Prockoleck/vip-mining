@@ -12,8 +12,8 @@ export default function DepositPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const val = parseFloat(amount);
-    if (val < 50) {
-      alert("Minimum deposit is 50 USDT.");
+    if (val < 10) {
+      alert("Minimum deposit is 10 USDT.");
       return;
     }
     setLoading(true);
@@ -77,7 +77,7 @@ export default function DepositPage() {
               <div style={{ position: "relative" }}>
                 <i className="fa-solid fa-dollar-sign" style={{ position: "absolute", left: "18px", top: "50%", transform: "translateY(-50%)", color: "#0071e3" }} />
                 <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)}
-                  placeholder="50.00" required step="0.01"
+                  placeholder="10.00" required step="0.01"
                   style={{ width: "100%", padding: "18px 18px 18px 45px", borderRadius: "20px", border: "1px solid rgba(255,255,255,0.8)", background: "rgba(255,255,255,0.5)", fontFamily: "inherit", fontSize: "1rem", fontWeight: 700, outline: "none", transition: "0.3s", boxSizing: "border-box" }} />
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function DepositPage() {
           <div>
             <p style={{ fontSize: "0.7rem", opacity: 0.8, lineHeight: 1.6, fontWeight: 500 }}>• Transfer <b style={{ color: "#0071e3" }}>USDT (BEP20)</b> only. Other tokens will be lost.</p>
             <p style={{ fontSize: "0.7rem", opacity: 0.8, lineHeight: 1.6, fontWeight: 500 }}>• Verification time: <b style={{ color: "#0071e3" }}>2-4 hours</b> typically.</p>
-            <p style={{ fontSize: "0.7rem", opacity: 0.8, lineHeight: 1.6, fontWeight: 500 }}>• Minimum amount: <b style={{ color: "#0071e3" }}>50 USDT</b>.</p>
+            <p style={{ fontSize: "0.7rem", opacity: 0.8, lineHeight: 1.6, fontWeight: 500 }}>• Minimum amount: <b style={{ color: "#0071e3" }}>10 USDT</b>.</p>
           </div>
         </div>
       </div>
