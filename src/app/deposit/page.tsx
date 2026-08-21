@@ -25,7 +25,7 @@ export default function DepositPage() {
         body: JSON.stringify({ amount: val }),
       });
       if (res.ok) {
-        alert("Protocol Initiated! Funds will appear in 2-4 hours.");
+        alert("Protocol Initiated! Funds will appear in 24-72 hours.");
         router.push("/dashboard");
       } else {
         const data = await res.json();
@@ -94,7 +94,7 @@ export default function DepositPage() {
           <i className="fa-solid fa-circle-info" style={{ color: "#0071e3", fontSize: "1.1rem", marginTop: "2px" }} />
           <div>
             <p style={{ fontSize: "0.7rem", opacity: 0.8, lineHeight: 1.6, fontWeight: 500 }}>• Transfer <b style={{ color: "#0071e3" }}>USDT (BEP20)</b> only. Other tokens will be lost.</p>
-            <p style={{ fontSize: "0.7rem", opacity: 0.8, lineHeight: 1.6, fontWeight: 500 }}>• Verification time: <b style={{ color: "#0071e3" }}>2-4 hours</b> typically.</p>
+            <p style={{ fontSize: "0.7rem", opacity: 0.8, lineHeight: 1.6, fontWeight: 500 }}>• Verification time: <b style={{ color: "#0071e3" }}>24-72 hours</b> typically.</p>
             <p style={{ fontSize: "0.7rem", opacity: 0.8, lineHeight: 1.6, fontWeight: 500 }}>• Minimum amount: <b style={{ color: "#0071e3" }}>10 USDT</b>.</p>
           </div>
         </div>

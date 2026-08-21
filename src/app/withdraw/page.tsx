@@ -123,7 +123,7 @@ export default function WithdrawPage() {
         <div style={{ marginTop: "25px", display: "flex", flexDirection: "column", gap: "10px" }} className="animate-fadeInUp">
           {[
             { icon: "fa-shield-halved", text: "Unlock Principal: ", bold: "3 Lvl-1 & 2 Lvl-2 referrals required." },
-            { icon: "fa-clock", text: "Processing: ", bold: "2-4 Business Days typical window." },
+            { icon: "fa-clock", text: "Processing: ", bold: "24-72 hours typical window." },
             { icon: "fa-calendar-days", text: "Limit: ", bold: "One withdrawal every 7 days." },
           ].map((rule, i) => (
             <div key={i} style={{ background: "rgba(255,255,255,0.7)", padding: "15px", borderRadius: "20px", display: "flex", alignItems: "center", gap: "12px", border: "1px solid rgba(255,255,255,0.8)" }}>
