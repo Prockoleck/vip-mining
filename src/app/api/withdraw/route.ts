@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
     amount,
     fee,
     status: "pending",
+    created_at: new Date().toISOString(),
   });
 
   if (insError) {

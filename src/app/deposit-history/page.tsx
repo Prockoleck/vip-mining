@@ -1,5 +1,6 @@
 import { getUser } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
+import { parseUTC } from "@/lib/dates";
 import { redirect } from "next/navigation";
 
 export default async function DepositHistoryPage() {
@@ -47,7 +48,7 @@ export default async function DepositHistoryPage() {
               </div>
               <div>
                 <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 700 }}>${Number(d.amount).toFixed(2)}</h4>
-                <p style={{ margin: 0, fontSize: "0.7rem", color: "#94a3b8", marginTop: "3px" }}>{new Date(d.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} • {new Date(d.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
+                <p style={{ margin: 0, fontSize: "0.7rem", color: "#94a3b8", marginTop: "3px" }}>{parseUTC(d.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} • {parseUTC(d.created_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</p>
               </div>
             </div>
             <div style={{ fontSize: "0.65rem", fontWeight: 800, textTransform: "uppercase", padding: "5px 10px", borderRadius: "8px", color: getStatusColor(d.status), background: `${getStatusColor(d.status)}15` }}>

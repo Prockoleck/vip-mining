@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
   const { error } = await supabase
     .from("deposits")
-    .insert({ user_id: user.id, amount, status: "pending" });
+    .insert({ user_id: user.id, amount, status: "pending", created_at: new Date().toISOString() });
 
   if (error) {
     return NextResponse.json({ error: "Database error" }, { status: 500 });
