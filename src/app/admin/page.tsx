@@ -99,7 +99,7 @@ export default function AdminPage() {
   if (!data) return <div style={{ minHeight: "100vh", background: "#0b0f1a", color: "white", display: "flex", alignItems: "center", justifyContent: "center" }}><i className="fa-solid fa-spinner fa-spin" style={{ fontSize: "2rem", color: "#0071e3" }} /></div>;
 
   return (
-    <div style={{ background: "#0b0f1a", fontFamily: "var(--font-plus-jakarta), sans-serif", color: "#f1f5f9", padding: "20px", maxWidth: "1280px", margin: "0 auto" }}>
+    <div style={{ background: "#0b0f1a", fontFamily: "var(--font-plus-jakarta), sans-serif", color: "#f1f5f9", padding: "20px", width: "100%", minHeight: "100vh" }}>
       <style>{`
         @media (min-width: 768px) {
           .admin-header { flex-direction: row !important; }
