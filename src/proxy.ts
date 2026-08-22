@@ -33,9 +33,6 @@ export function proxy(request: NextRequest) {
 
   const publicPaths = ["/", "/api/auth"];
   if (publicPaths.includes(pathname) || pathname.startsWith("/api/")) {
-    if (session && pathname === "/") {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
     return NextResponse.next();
   }
 
