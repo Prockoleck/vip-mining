@@ -12,7 +12,7 @@ export default async function AuthPage() {
   }
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", overflow: "hidden", position: "relative", background: "#ffffff" }}>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", overflow: "hidden", background: "#ffffff" }}>
       <AuroraBackground />
       <Suspense>
         <AuthForm />
