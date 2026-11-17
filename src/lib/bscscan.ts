@@ -1,7 +1,11 @@
 const BSCSCAN_API_KEY = process.env.BSCSCAN_API_KEY || "";
 const BSCSCAN_WALLET = process.env.NEXT_PUBLIC_DEPOSIT_WALLET || "";
 const USDT_BEP20 = "0x55d398326f99059fF775485246999027B3197955";
-const IS_MOCK = !BSCSCAN_API_KEY || BSCSCAN_API_KEY === "mock";
+
+// Mock mode simulates transfers, so it must NEVER be active in production —
+// otherwise a pending deposit could be auto-approved without any real payment.
+const IS_MOCK =
+  process.env.NODE_ENV !== "production" && BSCSCAN_API_KEY === "mock";
 
 export interface BscTransfer {
   hash: string;
@@ -13,6 +17,10 @@ export interface BscTransfer {
 
 export async function getRecentUsdtTransfers(): Promise<BscTransfer[]> {
   if (IS_MOCK) return getMockTransfers();
+
+  // Fail closed: no API key means no transfers can be verified,
+  // so deposits stay pending for manual admin approval.
+  if (!BSCSCAN_API_KEY) return [];
 
   const url = `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=${USDT_BEP20}&address=${BSCSCAN_WALLET}&sort=desc&page=1&offset=20&apikey=${BSCSCAN_API_KEY}`;
 
