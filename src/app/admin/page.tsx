@@ -47,7 +47,11 @@ export default function AdminPage() {
   };
 
   const handleLogout = async () => {
-    document.cookie = "admin_session=; path=/; max-age=0";
+    try {
+      await fetch("/api/admin/auth", { method: "DELETE" });
+    } catch {
+      // ignore network errors, still reset local state
+    }
     setAuthenticated(false);
     setData(null);
     setPassword("");
@@ -62,7 +66,11 @@ export default function AdminPage() {
   };
 
   const handleAction = async (action: string, id: number) => {
-    await fetch(`/api/admin?action=${action}&id=${id}`);
+    await fetch("/api/admin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action, id }),
+    });
     loadData();
   };
 

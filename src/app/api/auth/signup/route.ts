@@ -3,17 +3,41 @@ import { supabase } from "@/lib/supabase";
 import { hashPassword, createToken } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
-  const { username, password, referrerCode } = await request.json();
+  let payload: { username?: unknown; password?: unknown; referrerCode?: unknown };
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const username = typeof payload.username === "string" ? payload.username.trim() : "";
+  const password = typeof payload.password === "string" ? payload.password : "";
+  const referrerCode =
+    typeof payload.referrerCode === "string" ? payload.referrerCode.trim() : "";
 
   if (!username || !password) {
     return NextResponse.json({ error: "Username and password required" }, { status: 400 });
+  }
+
+  if (username.length < 3 || username.length > 20) {
+    return NextResponse.json(
+      { error: "Username must be between 3 and 20 characters." },
+      { status: 400 }
+    );
+  }
+
+  if (password.length < 6) {
+    return NextResponse.json(
+      { error: "Password must be at least 6 characters." },
+      { status: 400 }
+    );
   }
 
   const { data: existing } = await supabase
     .from("users")
     .select("id")
     .eq("username", username)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     return NextResponse.json({ error: "Username already taken!" }, { status: 409 });
@@ -25,7 +49,7 @@ export async function POST(request: NextRequest) {
       .from("users")
       .select("id")
       .eq("referral_code", referrerCode)
-      .single();
+      .maybeSingle();
     if (referrer) referrerId = referrer.id;
   }
 
@@ -46,7 +70,8 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: "System Error." }, { status: 500 });
+    // A concurrent signup with the same name trips the unique constraint.
+    return NextResponse.json({ error: "Username already taken!" }, { status: 409 });
   }
 
   const token = await createToken(newUser.id, newUser.username);

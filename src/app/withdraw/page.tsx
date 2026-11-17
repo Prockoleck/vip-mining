@@ -30,6 +30,10 @@ export default function WithdrawPage() {
     e.preventDefault();
     const amt = parseFloat(amount);
     if (amt < 10) { alert("Minimum withdrawal is 10 USDT."); return; }
+    if (!/^0x[a-fA-F0-9]{40}$/.test(address.trim())) {
+      alert("Enter a valid BEP20 wallet address (0x followed by 40 characters).");
+      return;
+    }
     if (amt > withdrawable) {
       alert(unlocked ? "Insufficient balance." : `Principal Locked. Current profit: $${withdrawable.toFixed(2)}`);
       return;

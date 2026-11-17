@@ -2,14 +2,40 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { getUser } from "@/lib/auth";
 
+const MIN_WITHDRAWAL = 10;
+const FEE_RATE = 0.10;
+const EVM_ADDRESS = /^0x[a-fA-F0-9]{40}$/;
+
 export async function POST(request: NextRequest) {
   const user = await getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { amount, address } = await request.json();
+  let payload: { amount?: unknown; address?: unknown };
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
 
-  if (!amount || amount < 10) {
-    return NextResponse.json({ error: "Minimum withdrawal is 10 USDT." }, { status: 400 });
+  const amount = Number(payload.amount);
+  const address = typeof payload.address === "string" ? payload.address.trim() : "";
+
+  if (!Number.isFinite(amount)) {
+    return NextResponse.json({ error: "Enter a valid amount." }, { status: 400 });
+  }
+
+  if (amount < MIN_WITHDRAWAL) {
+    return NextResponse.json(
+      { error: `Minimum withdrawal is ${MIN_WITHDRAWAL} USDT.` },
+      { status: 400 }
+    );
+  }
+
+  if (!EVM_ADDRESS.test(address)) {
+    return NextResponse.json(
+      { error: "Enter a valid BEP20 wallet address (0x followed by 40 characters)." },
+      { status: 400 }
+    );
   }
 
   // Check referral unlock
@@ -44,13 +70,29 @@ export async function POST(request: NextRequest) {
     .eq("user_id", user.id)
     .gt("created_at", sevenDaysAgo)
     .limit(1)
-    .single();
+    .maybeSingle();
 
   if (recentWithdrawal) {
     return NextResponse.json({ error: "Withdrawal allowed once every 7 days." }, { status: 400 });
   }
 
-  const fee = amount * 0.10;
+  const fee = amount * FEE_RATE;
+
+  // Debit first, guarded on the balance we just validated. Two concurrent
+  // requests would otherwise both read the same balance and both succeed.
+  const { data: debited } = await supabase
+    .from("users")
+    .update({ balance: Number(user.balance) - amount })
+    .eq("id", user.id)
+    .eq("balance", user.balance)
+    .select("id");
+
+  if (!debited || debited.length === 0) {
+    return NextResponse.json(
+      { error: "Your balance changed. Please review and try again." },
+      { status: 409 }
+    );
+  }
 
   const { error: insError } = await supabase.from("withdrawals").insert({
     user_id: user.id,
@@ -62,13 +104,22 @@ export async function POST(request: NextRequest) {
   });
 
   if (insError) {
+    // Give the money back so a failed insert never silently keeps funds.
+    const { data: now } = await supabase
+      .from("users")
+      .select("balance")
+      .eq("id", user.id)
+      .single();
+
+    if (now) {
+      await supabase
+        .from("users")
+        .update({ balance: Number(now.balance) + amount })
+        .eq("id", user.id);
+    }
+
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
-
-  await supabase
-    .from("users")
-    .update({ balance: Number(user.balance) - amount })
-    .eq("id", user.id);
 
   return NextResponse.json({ success: true });
 }

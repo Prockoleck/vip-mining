@@ -46,3 +46,16 @@ export async function POST(request: NextRequest) {
   });
   return res;
 }
+
+// The admin cookie is httpOnly, so it can only be cleared server side.
+export async function DELETE() {
+  const res = NextResponse.json({ success: true });
+  res.cookies.set(ADMIN_COOKIE, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    path: "/",
+    maxAge: 0,
+  });
+  return res;
+}
