@@ -37,6 +37,14 @@ CREATE TABLE withdrawals (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Rate limiting (shared by every serverless instance)
+CREATE TABLE rate_limits (
+  id BIGSERIAL PRIMARY KEY,
+  key TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY;
+
 -- Indexes
 CREATE INDEX idx_users_referral_code ON users(referral_code);
 CREATE INDEX idx_users_referrer_id ON users(referrer_id);
@@ -45,3 +53,4 @@ CREATE INDEX idx_deposits_status ON deposits(status);
 CREATE UNIQUE INDEX deposits_tx_hash_unique ON deposits(tx_hash) WHERE tx_hash IS NOT NULL;
 CREATE INDEX idx_withdrawals_user_id ON withdrawals(user_id);
 CREATE INDEX idx_withdrawals_status ON withdrawals(status);
+CREATE INDEX idx_rate_limits_key_time ON rate_limits(key, created_at DESC);

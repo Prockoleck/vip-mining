@@ -7,7 +7,7 @@ const WINDOW_MS = 15 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
   const ip = clientIp(request);
-  const limit = rateLimit(`admin:${ip}`, MAX_ATTEMPTS, WINDOW_MS);
+  const limit = await rateLimit(`admin:${ip}`, MAX_ATTEMPTS, WINDOW_MS);
 
   if (!limit.allowed) {
     const waitMin = Math.ceil(limit.retryAfterMs / 60000);
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 });
   }
 
-  resetRateLimit(`admin:${ip}`);
+  await resetRateLimit(`admin:${ip}`);
 
   const token = await createAdminToken();
   const res = NextResponse.json({ success: true });

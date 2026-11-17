@@ -8,7 +8,7 @@ const WINDOW_MS = 15 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
   const ip = clientIp(request);
-  const limit = rateLimit(`login:${ip}`, MAX_ATTEMPTS, WINDOW_MS);
+  const limit = await rateLimit(`login:${ip}`, MAX_ATTEMPTS, WINDOW_MS);
 
   if (!limit.allowed) {
     const minutes = Math.ceil(limit.retryAfterMs / 60000);
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid username or password." }, { status: 401 });
   }
 
-  resetRateLimit(`login:${ip}`);
+  await resetRateLimit(`login:${ip}`);
 
   const token = await createToken(user.id, user.username);
 

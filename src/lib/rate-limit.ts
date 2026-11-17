@@ -1,35 +1,43 @@
-type Entry = { count: number; resetAt: number };
+import { supabase } from "@/lib/supabase";
 
-const store = new Map<string, Entry>();
+// In-memory counters do not work on serverless: each request may land on a
+// different instance, so every instance would allow the full quota again.
+// Attempts are therefore recorded in Postgres, which all instances share.
 
-// Bound the map so a flood of unique IPs cannot grow it without limit.
-function sweep(now: number) {
-  if (store.size < 5000) return;
-  for (const [key, entry] of store) {
-    if (now >= entry.resetAt) store.delete(key);
+export async function rateLimit(key: string, max: number, windowMs: number) {
+  const since = new Date(Date.now() - windowMs).toISOString();
+
+  const { data, count } = await supabase
+    .from("rate_limits")
+    .select("created_at", { count: "exact" })
+    .eq("key", key)
+    .gte("created_at", since)
+    .order("created_at", { ascending: true })
+    .limit(1);
+
+  if ((count ?? 0) >= max) {
+    const oldest = data?.[0]?.created_at
+      ? new Date(data[0].created_at).getTime()
+      : Date.now();
+    return {
+      allowed: false,
+      retryAfterMs: Math.max(0, windowMs - (Date.now() - oldest)),
+    };
   }
-}
 
-export function rateLimit(key: string, max: number, windowMs: number) {
-  const now = Date.now();
-  const entry = store.get(key);
+  await supabase.from("rate_limits").insert({ key });
 
-  if (!entry || now >= entry.resetAt) {
-    store.set(key, { count: 1, resetAt: now + windowMs });
-    sweep(now);
-    return { allowed: true, retryAfterMs: 0 };
+  // Cheap probabilistic purge so the table does not grow forever.
+  if (Math.random() < 0.02) {
+    const cutoff = new Date(Date.now() - windowMs * 4).toISOString();
+    await supabase.from("rate_limits").delete().lt("created_at", cutoff);
   }
 
-  if (entry.count >= max) {
-    return { allowed: false, retryAfterMs: entry.resetAt - now };
-  }
-
-  entry.count += 1;
   return { allowed: true, retryAfterMs: 0 };
 }
 
-export function resetRateLimit(key: string) {
-  store.delete(key);
+export async function resetRateLimit(key: string) {
+  await supabase.from("rate_limits").delete().eq("key", key);
 }
 
 export function clientIp(request: Request) {
