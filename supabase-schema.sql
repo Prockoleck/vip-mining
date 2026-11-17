@@ -22,6 +22,7 @@ CREATE TABLE deposits (
   user_id INTEGER REFERENCES users(id),
   amount DECIMAL(12,2) NOT NULL,
   status VARCHAR(20) DEFAULT 'pending',
+  tx_hash TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -41,5 +42,6 @@ CREATE INDEX idx_users_referral_code ON users(referral_code);
 CREATE INDEX idx_users_referrer_id ON users(referrer_id);
 CREATE INDEX idx_deposits_user_id ON deposits(user_id);
 CREATE INDEX idx_deposits_status ON deposits(status);
+CREATE UNIQUE INDEX deposits_tx_hash_unique ON deposits(tx_hash) WHERE tx_hash IS NOT NULL;
 CREATE INDEX idx_withdrawals_user_id ON withdrawals(user_id);
 CREATE INDEX idx_withdrawals_status ON withdrawals(status);

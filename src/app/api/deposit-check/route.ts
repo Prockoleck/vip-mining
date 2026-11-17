@@ -24,6 +24,17 @@ export async function GET() {
 
   const transfers = await getRecentUsdtTransfers();
 
+  // A single on-chain transfer may only ever be claimed once, otherwise several
+  // users could each be credited for the same payment.
+  const { data: claimed } = await supabase
+    .from("deposits")
+    .select("tx_hash")
+    .in("tx_hash", transfers.length ? transfers.map((t) => t.hash) : ["__none__"]);
+
+  const claimedHashes = new Set(
+    (claimed ?? []).map((c) => c.tx_hash).filter(Boolean) as string[]
+  );
+
   for (const deposit of pending) {
     const depositTime = new Date(deposit.created_at + (deposit.created_at.endsWith("Z") ? "" : "Z")).getTime() / 1000;
     const expiryTime = depositTime + EXPIRY_MINUTES * 60;
@@ -36,37 +47,45 @@ export async function GET() {
     for (const tx of transfers) {
       if (tx.timestamp < depositTime - 30) continue;
       if (tx.timestamp > expiryTime) continue;
+      if (claimedHashes.has(tx.hash)) continue;
 
       const txAmount = Number(tx.value) / 1e18;
-      if (Math.abs(txAmount - depositAmount) <= AMOUNT_TOLERANCE) {
+      if (Math.abs(txAmount - depositAmount) > AMOUNT_TOLERANCE) continue;
+
+      // Claim the transfer first. The unique index on tx_hash makes this
+      // atomic: a concurrent request for the same transfer fails here and
+      // therefore never credits a balance.
+      const { error: claimError } = await supabase
+        .from("deposits")
+        .update({ status: "approved", tx_hash: tx.hash })
+        .eq("id", deposit.id)
+        .eq("status", "pending");
+
+      if (claimError) continue;
+      claimedHashes.add(tx.hash);
+
+      const { data: current } = await supabase
+        .from("users")
+        .select("balance, total_recharge")
+        .eq("id", user.id)
+        .single();
+
+      if (current) {
         await supabase
-          .from("deposits")
-          .update({ status: "approved" })
-          .eq("id", deposit.id);
-
-        const { data: current } = await supabase
           .from("users")
-          .select("balance, total_recharge")
-          .eq("id", user.id)
-          .single();
-
-        if (current) {
-          await supabase
-            .from("users")
-            .update({
-              balance: Number(current.balance) + depositAmount,
-              total_recharge: Number(current.total_recharge) + depositAmount,
-            })
-            .eq("id", user.id);
-        }
-
-        return NextResponse.json({
-          status: "approved",
-          deposit_id: deposit.id,
-          amount: depositAmount,
-          mock: IS_MOCK,
-        });
+          .update({
+            balance: Number(current.balance) + depositAmount,
+            total_recharge: Number(current.total_recharge) + depositAmount,
+          })
+          .eq("id", user.id);
       }
+
+      return NextResponse.json({
+        status: "approved",
+        deposit_id: deposit.id,
+        amount: depositAmount,
+        mock: IS_MOCK,
+      });
     }
   }
 
