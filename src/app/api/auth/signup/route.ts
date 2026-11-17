@@ -2,6 +2,68 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { hashPassword, createToken } from "@/lib/auth";
 
+const LEVEL4_BONUS = 0.25;
+const CODE_ALPHABET = "abcdefghijkmnopqrstuvwxyz23456789";
+const CODE_LENGTH = 8;
+
+function randomReferralCode() {
+  let out = "";
+  for (let i = 0; i < CODE_LENGTH; i++) {
+    out += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
+  }
+  return out;
+}
+
+async function allocateReferralCode() {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    const candidate = randomReferralCode();
+    const { data: taken } = await supabase
+      .from("users")
+      .select("id")
+      .eq("referral_code", candidate)
+      .maybeSingle();
+    if (!taken) return candidate;
+  }
+  return null;
+}
+
+// The Team page advertises a flat $0.25 for every Level-4 member, so the
+// commission has to actually be paid when that member joins.
+async function payLevel4Bonus(referrerId: number) {
+  let currentId = referrerId;
+
+  for (let depth = 1; depth <= 4; depth++) {
+    if (!currentId || currentId <= 0) return;
+
+    if (depth === 4) {
+      const { data: upline } = await supabase
+        .from("users")
+        .select("balance, withdrawable_profit")
+        .eq("id", currentId)
+        .maybeSingle();
+
+      if (!upline) return;
+
+      await supabase
+        .from("users")
+        .update({
+          balance: Number(upline.balance) + LEVEL4_BONUS,
+          withdrawable_profit: Number(upline.withdrawable_profit) + LEVEL4_BONUS,
+        })
+        .eq("id", currentId);
+      return;
+    }
+
+    const { data: next } = await supabase
+      .from("users")
+      .select("referrer_id")
+      .eq("id", currentId)
+      .maybeSingle();
+
+    currentId = next?.referrer_id ?? 0;
+  }
+}
+
 export async function POST(request: NextRequest) {
   let payload: { username?: unknown; password?: unknown; referrerCode?: unknown };
   try {
@@ -54,7 +116,14 @@ export async function POST(request: NextRequest) {
   }
 
   const hashedPass = await hashPassword(password);
-  const refCode = Math.random().toString(36).substring(2, 10);
+
+  const refCode = await allocateReferralCode();
+  if (!refCode) {
+    return NextResponse.json(
+      { error: "Could not create an account right now. Please try again." },
+      { status: 503 }
+    );
+  }
 
   const { data: newUser, error } = await supabase
     .from("users")
@@ -71,7 +140,19 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     // A concurrent signup with the same name trips the unique constraint.
-    return NextResponse.json({ error: "Username already taken!" }, { status: 409 });
+    if (error.code === "23505") {
+      return NextResponse.json({ error: "Username already taken!" }, { status: 409 });
+    }
+    return NextResponse.json({ error: "System Error." }, { status: 500 });
+  }
+
+  if (referrerId > 0) {
+    // Failure here must not block the signup itself.
+    try {
+      await payLevel4Bonus(referrerId);
+    } catch (e) {
+      console.error("Level 4 bonus failed for new user", newUser.id, e);
+    }
   }
 
   const token = await createToken(newUser.id, newUser.username);

@@ -1,9 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { verifyPassword, createToken } from "@/lib/auth";
+import { rateLimit, resetRateLimit, clientIp } from "@/lib/rate-limit";
+
+const MAX_ATTEMPTS = 10;
+const WINDOW_MS = 15 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
-  const { username, password } = await request.json();
+  const ip = clientIp(request);
+  const limit = rateLimit(`login:${ip}`, MAX_ATTEMPTS, WINDOW_MS);
+
+  if (!limit.allowed) {
+    const minutes = Math.ceil(limit.retryAfterMs / 60000);
+    return NextResponse.json(
+      { error: `Too many attempts. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.` },
+      { status: 429 }
+    );
+  }
+
+  let payload: { username?: unknown; password?: unknown };
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  const username = typeof payload.username === "string" ? payload.username.trim() : "";
+  const password = typeof payload.password === "string" ? payload.password : "";
 
   if (!username || !password) {
     return NextResponse.json({ error: "Username and password required" }, { status: 400 });
@@ -13,16 +36,19 @@ export async function POST(request: NextRequest) {
     .from("users")
     .select("*")
     .eq("username", username)
-    .single();
+    .maybeSingle();
 
+  // Same message for both cases so this cannot be used to enumerate accounts.
   if (!user) {
-    return NextResponse.json({ error: "User not found!" }, { status: 404 });
+    return NextResponse.json({ error: "Invalid username or password." }, { status: 401 });
   }
 
   const valid = await verifyPassword(password, user.password);
   if (!valid) {
-    return NextResponse.json({ error: "Invalid Password!" }, { status: 401 });
+    return NextResponse.json({ error: "Invalid username or password." }, { status: 401 });
   }
+
+  resetRateLimit(`login:${ip}`);
 
   const token = await createToken(user.id, user.username);
 

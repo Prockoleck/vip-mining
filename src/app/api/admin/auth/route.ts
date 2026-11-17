@@ -1,39 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminToken, ADMIN_COOKIE } from "@/lib/admin-auth";
+import { rateLimit, resetRateLimit, clientIp } from "@/lib/rate-limit";
 
-const attempts = new Map<string, { count: number; resetAt: number }>();
 const MAX_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60 * 1000;
 
-function getClientIP(req: NextRequest) {
-  return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-}
-
 export async function POST(request: NextRequest) {
-  const ip = getClientIP(request);
+  const ip = clientIp(request);
+  const limit = rateLimit(`admin:${ip}`, MAX_ATTEMPTS, WINDOW_MS);
 
-  const now = Date.now();
-  const record = attempts.get(ip);
-  if (record && now < record.resetAt && record.count >= MAX_ATTEMPTS) {
-    const waitMin = Math.ceil((record.resetAt - now) / 60000);
+  if (!limit.allowed) {
+    const waitMin = Math.ceil(limit.retryAfterMs / 60000);
     return NextResponse.json(
       { error: `Too many attempts. Try again in ${waitMin}min.` },
       { status: 429 }
     );
   }
 
-  if (!record || now >= record.resetAt) {
-    attempts.set(ip, { count: 0, resetAt: now + WINDOW_MS });
+  let password = "";
+  try {
+    const body = await request.json();
+    password = typeof body.password === "string" ? body.password : "";
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { password } = await request.json();
-  if (password !== process.env.ADMIN_PASSWORD) {
-    const r = attempts.get(ip)!;
-    r.count++;
+  const expected = process.env.ADMIN_PASSWORD;
+  if (!expected) {
+    return NextResponse.json({ error: "Admin access is not configured." }, { status: 503 });
+  }
+
+  if (password !== expected) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 });
   }
 
-  attempts.delete(ip);
+  resetRateLimit(`admin:${ip}`);
 
   const token = await createAdminToken();
   const res = NextResponse.json({ success: true });
